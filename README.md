@@ -1,6 +1,6 @@
 # db-agent CLI: read-only DBA toolkit for SQL Server, SSRS and Databricks
 
-Check a database before you upgrade, migrate or pay for another year of it. db-agent only reads, and writes a report you can hand to a manager: SQL Server 2016/2017 upgrade risks, an SSRS to Power BI report inventory, and Databricks workspace health with DBU spend. One command per engine. Nothing is changed on any server.
+Check a database before you upgrade, migrate or pay for another year of it. Every command only reads, and writes a report you can hand to a manager: SQL Server 2016/2017 upgrade risks, an SSRS to Power BI report inventory, and Databricks workspace health with DBU spend. One command per engine. The one exception is `sqlserver migrate`, which writes to the target, and only after you approve a plan.
 
 Looking for the text-to-SQL agent? See [db-agent/db-agent](https://github.com/db-agent/db-agent).
 
@@ -11,7 +11,7 @@ db-agent engines          # what is implemented and what is planned
 
 | Engine | Status | Verbs |
 |---|---|---|
-| `sqlserver` | available | `inventory`, `ssrs`, `validate`, `report` |
+| `sqlserver` | available | `inventory`, `ssrs`, `validate`, `report`, `migrate plan` and `migrate run` ([docs](https://github.com/db-agent/db-agent-kit/blob/main/docs/migrate.md)) |
 | `databricks` | available; live-tested on one small AWS workspace only, see the docs | `health` ([docs](https://github.com/db-agent/db-agent-kit/blob/main/docs/databricks-health.md)) |
 
 Each engine is described below. To add one, see [docs/adding-an-engine.md](https://github.com/db-agent/db-agent-kit/blob/main/docs/adding-an-engine.md).
@@ -37,6 +37,7 @@ a report you can hand to a manager or a client. It is the first step of an **SSR
 | `sqlserver ssrs` | Every report: data sources, datasets, tables and procedures used, parameters, subreports, custom code, subscriptions, usage. Each report is **move**, **review** or **retire** with the reason. |
 | `sqlserver validate` | Runs each "move" report's queries on the old and new server and compares row counts and totals. |
 | `sqlserver report` | One printable `summary.html` and one Excel workbook with all of it. |
+| `sqlserver migrate plan` / `run` | **Writes to the target.** `plan` reads both servers and writes a plan you review. `run` executes that plan after you approve its fingerprint: create the Azure SQL database, export a BACPAC, import it, compare the two. SQL Server to Azure SQL Database only. See [docs/migrate.md](https://github.com/db-agent/db-agent-kit/blob/main/docs/migrate.md). |
 
 ## Install
 
@@ -105,7 +106,7 @@ The exact T-SQL script is in [docs/permissions.md](https://github.com/db-agent/d
 - It does **not convert reports.** It tells you what to move and what is hard. A layout hint says which reports look like Power BI paginated reports and which look like an interactive rebuild. It is a hint only.
 - It does **not read business data** during `inventory` or `ssrs`. Row counts come from system views.
 - `validate` is the one command that runs report queries. It keeps **only row counts and numeric totals**, never row values, and only on a login you choose to give read access to.
-- It does **not change anything** on any server, and sends nothing over the network except to the SQL Servers you name.
+- `inventory`, `ssrs`, `validate` and `report` do **not change anything** on any server. Only `migrate run` writes, and only to the target you named in an approved plan. Nothing is sent over the network except to the SQL Servers you name (and, for `migrate`, to Azure through the Azure CLI).
 
 ## FAQ
 
