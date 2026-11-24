@@ -16,8 +16,10 @@ from . import SUPPORTED_SQL_SERVER, __version__, classify, outputs, report as re
 from . import inventory as inventory_mod
 from .db import ConnectionConfig, DatabaseError, SafeConnection
 from .guard import GuardError, QueryGuard
+from .migrate.cli import app as migrate_app
 
-app = typer.Typer(add_completion=False, no_args_is_help=True, help="Read-only inventory of SQL Server and SSRS reports before an upgrade or a move to Power BI.")
+app = typer.Typer(add_completion=False, no_args_is_help=True, help="Inventory SQL Server and SSRS reports (read-only), and plan and run a database migration (migrate).")
+app.add_typer(migrate_app, name="migrate")
 
 # ---- shared options -----------------------------------------------------------------------------
 Server = Annotated[Optional[str], typer.Option("--server", envvar="DBAGENT_SQL_SERVER", help="SQL Server host name or address.")]
